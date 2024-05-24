@@ -1,0 +1,18 @@
+{
+  "extras": [
+    "lazyvim.plugins.extras.coding.codeium",
+    "lazyvim.plugins.extras.coding.tabnine",
+    "lazyvim.plugins.extras.dap.nlua",
+    "lazyvim.plugins.extras.lang.go",
+    "lazyvim.plugins.extras.lang.java",
+    "lazyvim.plugins.extras.lang.python",
+    "lazyvim.plugins.extras.ui.alpha",
+    "lazyvim.plugins.extras.ui.mini-animate",
+    "lazyvim.plugins.extras.editor.outline"
+  ],
+  "news": {
+    "NEWS.md": "4964",
+    "doc/news.txt": "13995"
+  },
+  "version": 4
+}
