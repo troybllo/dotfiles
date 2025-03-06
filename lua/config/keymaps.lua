@@ -3,9 +3,9 @@
 -- Add any additional keymaps here
 --
 --
-local discipline = require("troybello.discipline")
+-- local discipline = require("troybello.discipline")
 
-discipline.cowboy()
+-- discipline.cowboy()
 
 local keymap = vim.keymap
 local opts = { noremap = true, silent = true }

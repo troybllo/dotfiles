@@ -1,4 +1,62 @@
 local lualine = require("lualine")
+local dap = require("dap")
+
+dap.configurations.java = {
+  {
+    type = "java",
+    request = "launch",
+    name = "Launch Java Program",
+  },
+}
+
+vim.fn.sign_define("DapBreakpoint", {
+  text = "🔴",
+  texthl = "DapBreakpointSymbol",
+  linehl = "DapBreakpoint",
+  numhl = "DapBreakpoint",
+})
+vim.fn.sign_define("DapStopped", {
+  texthl = "DapStoppedSymbol",
+  linehl = "CursorLine",
+  numhl = "DapBreakpoint",
+})
+
+vim.keymap.set("n", "<F5>", function()
+  require("dap").continue()
+end)
+vim.keymap.set("n", "<F10>", function()
+  require("dap").step_over()
+end)
+vim.keymap.set("n", "<F11>", function()
+  require("dap").step_into()
+end)
+vim.keymap.set("n", "<F12>", function()
+  require("dap").step_out()
+end)
+vim.keymap.set("n", "<Leader>b", function()
+  require("dap").toggle_breakpoint()
+end)
+
+local dapui = require("dapui")
+dapui.setup()
+
+dap.listeners.before.attach.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+  --dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+  --dapui.close()
+end
+
+vim.keymap.set("n", "<Leader>du", function()
+  dapui.toggle()
+end)
+
 return {
 
   -- messages, cmdline and the popupmenu
@@ -41,7 +99,6 @@ return {
           filter = {},
         },
       }
-
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "markdown",
         callback = function(event)
@@ -53,6 +110,210 @@ return {
 
       opts.presets.lsp_doc_border = true
     end,
+  },
+
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    ---@type snacks.Config
+    opts = {
+      bigfile = { enabled = true },
+      dashboard = { enabled = true },
+      indent = { enabled = true },
+      input = { enabled = true },
+      notifier = {
+        enabled = true,
+        timeout = 3000,
+      },
+      quickfile = { enabled = true },
+      scroll = { enabled = true },
+      statuscolumn = { enabled = true },
+      words = { enabled = true },
+      styles = {
+        notification = {
+          -- wo = { wrap = true } -- Wrap notifications
+        },
+      },
+    },
+    keys = {
+      {
+        "<leader>z",
+        function()
+          Snacks.zen()
+        end,
+        desc = "Toggle Zen Mode",
+      },
+      {
+        "<leader>Z",
+        function()
+          Snacks.zen.zoom()
+        end,
+        desc = "Toggle Zoom",
+      },
+      {
+        "<leader>.",
+        function()
+          Snacks.scratch()
+        end,
+        desc = "Toggle Scratch Buffer",
+      },
+      {
+        "<leader>S",
+        function()
+          Snacks.scratch.select()
+        end,
+        desc = "Select Scratch Buffer",
+      },
+      {
+        "<leader>n",
+        function()
+          Snacks.notifier.show_history()
+        end,
+        desc = "Notification History",
+      },
+      {
+        "<leader>bd",
+        function()
+          Snacks.bufdelete()
+        end,
+        desc = "Delete Buffer",
+      },
+      {
+        "<leader>cR",
+        function()
+          Snacks.rename.rename_file()
+        end,
+        desc = "Rename File",
+      },
+      {
+        "<leader>gB",
+        function()
+          Snacks.gitbrowse()
+        end,
+        desc = "Git Browse",
+      },
+      {
+        "<leader>gb",
+        function()
+          Snacks.git.blame_line()
+        end,
+        desc = "Git Blame Line",
+      },
+      {
+        "<leader>gf",
+        function()
+          Snacks.lazygit.log_file()
+        end,
+        desc = "Lazygit Current File History",
+      },
+      {
+        "<leader>gg",
+        function()
+          Snacks.lazygit()
+        end,
+        desc = "Lazygit",
+      },
+      {
+        "<leader>gl",
+        function()
+          Snacks.lazygit.log()
+        end,
+        desc = "Lazygit Log (cwd)",
+      },
+      {
+        "<leader>un",
+        function()
+          Snacks.notifier.hide()
+        end,
+        desc = "Dismiss All Notifications",
+      },
+      {
+        "<c-/>",
+        function()
+          Snacks.terminal()
+        end,
+        desc = "Toggle Terminal",
+      },
+      {
+        "<c-_>",
+        function()
+          Snacks.terminal()
+        end,
+        desc = "which_key_ignore",
+      },
+      {
+        "]]",
+        function()
+          Snacks.words.jump(vim.v.count1)
+        end,
+        desc = "Next Reference",
+        mode = { "n", "t" },
+      },
+      {
+        "[[",
+        function()
+          Snacks.words.jump(-vim.v.count1)
+        end,
+        desc = "Prev Reference",
+        mode = { "n", "t" },
+      },
+      {
+        "<leader>N",
+        desc = "Neovim News",
+        function()
+          Snacks.win({
+            file = vim.api.nvim_get_runtime_file("doc/news.txt", false)[1],
+            width = 0.6,
+            height = 0.6,
+            wo = {
+              spell = false,
+              wrap = false,
+              signcolumn = "yes",
+              statuscolumn = " ",
+              conceallevel = 3,
+            },
+          })
+        end,
+      },
+    },
+    init = function()
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "VeryLazy",
+        callback = function()
+          -- Setup some globals for debugging (lazy-loaded)
+          _G.dd = function(...)
+            Snacks.debug.inspect(...)
+          end
+          _G.bt = function()
+            Snacks.debug.backtrace()
+          end
+          vim.print = _G.dd -- Override print to use snacks for `:=` command
+
+          -- Create some toggle mappings
+          Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+          Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+          Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
+          Snacks.toggle.diagnostics():map("<leader>ud")
+          Snacks.toggle.line_number():map("<leader>ul")
+          Snacks.toggle
+            .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
+            :map("<leader>uc")
+          Snacks.toggle.treesitter():map("<leader>uT")
+          Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
+          Snacks.toggle.inlay_hints():map("<leader>uh")
+          Snacks.toggle.indent():map("<leader>ug")
+          Snacks.toggle.dim():map("<leader>uD")
+        end,
+      })
+    end,
+  },
+
+  {
+    "j-hui/fidget.nvim",
+    opts = {
+      -- options
+    },
   },
 
   {
@@ -79,6 +340,69 @@ return {
   },
 
   {
+    "utilyre/barbecue.nvim",
+    name = "barbecue",
+    version = "*",
+    dependencies = {
+      "SmiteshP/nvim-navic",
+      "nvim-tree/nvim-web-devicons", -- optional dependency
+    },
+    opts = {
+      -- configurations go here
+    },
+  },
+
+  {
+    "SmiteshP/nvim-navic",
+    requires = { "nvim-navic" },
+  },
+
+  { "mistricky/codesnap.nvim", build = "make" },
+
+  --[[
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    event = "VeryLazy",
+    opts = function()
+      local lualine_require = require("lualine_require")
+      lualine_require.require = require
+      local custom_gruvbox = require("lualine.themes.gruvbox")
+      custom_gruvbox.insert.c.bg = "#3c3836"
+
+      custom_gruvbox.insert.c.fg = "#a89984"
+
+      vim.o.laststatus = vim.g.lualine_laststatus
+
+      local opts = {
+        options = {
+          theme = "custom_gruvbox",
+          section_separators = "",
+          component_separators = "",
+          globalstatus = vim.o.laststatus == 3,
+          disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "filename" },
+          lualine_c = {
+            "branch",
+            function()
+              return vim.fn["nvim_treesitter#statusline"](180)
+            end,
+            "diff",
+            "diagnostics",
+          },
+          lualine_x = {},
+          lualine_y = { "location" },
+          lualine_z = { "filetype" },
+        },
+      }
+      return opts
+    end,
+  },
+]]
+  {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = {},
@@ -90,10 +414,10 @@ return {
 -- Color table for highlights
 -- stylua: ignore
 local colors = {
-  bg       = '#202328',
+  bg       = '',
   fg       = '#bbc2cf',
   yellow   = '#ECBE7B',
-  cyan     = '#008080',
+  cyan     = '#95B4B5',
   darkblue = '#081633',
   green    = '#98be65',
   orange   = '#FF8800',
@@ -161,14 +485,6 @@ local colors = {
       end
 
       ins_left({
-        function()
-          return "▊"
-        end,
-        color = { fg = colors.blue }, -- Sets highlighting of component
-        padding = { left = 0, right = 1 }, -- We don't need space before this
-      })
-
-      ins_left({
         -- mode component
         function()
           return ""
@@ -210,12 +526,14 @@ local colors = {
       })
 
       ins_left({
-        "filename",
+        "filetype",
+
+        icons_enabled = true,
         cond = conditions.buffer_not_empty,
-        color = { fg = colors.red, gui = "bold" },
+        color = { fg = colors.cyan, gui = "bold" },
       })
 
-      ins_left({ "location", color = { fg = colors.blue, gui = "bold" } })
+      ins_left({ "location", color = { fg = colors.white, gui = "bold" } })
 
       ins_left({ "progress", color = { fg = colors.violet, gui = "bold" } })
 
@@ -258,32 +576,31 @@ local colors = {
           color = { fg = "#ffffff", gui = "bold" },
         }),
 
-        ins_right({
-          "filetype",
-          fmt = string.upper,
-          icons_enabled = true,
-          color = { fg = colors.magenta, gui = "bold" },
-        }),
-
         -- Add components to right sections
         ins_right({
           "o:encoding", -- option component same as &encoding in viml
           fmt = string.upper, -- I'm not sure why it's upper case either ;)
           cond = conditions.hide_in_width,
-          color = { fg = colors.green, gui = "bold" },
+          color = { fg = colors.cyan, gui = "bold" },
+        }),
+
+        ins_right({
+          "filename",
+          icons_enabled = true,
+          color = { fg = colors.yellow, gui = "bold" },
         }),
 
         ins_right({
           "fileformat",
           fmt = string.upper,
           icons_enabled = false, -- I think icons are cool but Eviline doesn't have them. sigh
-          color = { fg = colors.green, gui = "bold" },
+          color = { fg = colors.cyan, gui = "bold" },
         }),
 
         ins_right({
           "branch",
           icon = "",
-          color = { fg = colors.violet, gui = "bold" },
+          color = { fg = colors.red, gui = "bold" },
         }),
 
         ins_right({
@@ -291,25 +608,19 @@ local colors = {
           -- Is it me or the symbol for modified us really weird
           symbols = { added = " ", modified = "󰝤 ", removed = " " },
           diff_color = {
-            added = { fg = colors.green },
+            added = { fg = colors.cyan },
             modified = { fg = colors.orange },
             removed = { fg = colors.red },
           },
           cond = conditions.hide_in_width,
-        }),
-
-        ins_right({
-          function()
-            return "▊"
-          end,
-          color = { fg = colors.blue },
-          padding = { left = 1 },
         }),
       })
 
       lualine.setup(config)
     end,
   },
+
+  --]]
 
   -- buffer line
   {
@@ -322,6 +633,7 @@ local colors = {
     opts = {
       options = {
         mode = "tabs",
+        themable = false,
         -- separator_style = "slant",
         show_buffer_close_icons = false,
         show_close_icon = false,
@@ -331,6 +643,7 @@ local colors = {
 
   -- statusline
 
+  --[[
   -- add discord presence
   {
     "andweeb/presence.nvim",
@@ -358,7 +671,201 @@ local colors = {
       line_number_text = "Line %s out of %s",
     },
   },
+    ]]
+  --
+  -- {
+  --   "vyfor/cord.nvim",
+  --   build = ":Cord update",
+  --   event = "VeryLazy",
+  --   opts = {
+  --     usercmds = true, -- Enable user commands
+  --     log_level = "error", -- One of 'trace', 'debug', 'info', 'warn', 'error', 'off'
+  --     timer = {
+  --       interval = 1500, -- Interval between presence updates in milliseconds (min 500)
+  --       reset_on_idle = false, -- Reset start timestamp on idle
+  --       reset_on_change = false, -- Reset start timestamp on presence change
+  --     },
+  --     editor = {
+  --       image = nil, -- Image ID or URL in case a custom client id is provided
+  --       client = "neovim", -- vim, neovim, lunarvim, nvchad, astronvim or your application's client id
+  --       tooltip = "Neovim", -- Text to display when hovering over the editor's image
+  --     },
+  --     display = {
+  --       show_time = true, -- Display start timestamp
+  --       show_repository = true, -- Display 'View repository' button linked to repository url, if any
+  --       show_cursor_position = false, -- Display line and column number of cursor's position
+  --       swap_fields = false, -- If enabled, workspace is displayed first
+  --       swap_icons = false, -- If enabled, editor is displayed on the main image
+  --       workspace_blacklist = {}, -- List of workspace names that will hide rich presence
+  --     },
+  --     lsp = {
+  --       show_problem_count = true, -- Display number of diagnostics problems
+  --       severity = 1, -- 1 = Error, 2 = Warning, 3 = Info, 4 = Hint
+  --       scope = "workspace", -- buffer or workspace
+  --     },
+  --     idle = {
+  --       enable = true, -- Enable idle status
+  --       show_status = true, -- Display idle status, disable to hide the rich presence on idle
+  --       timeout = 300000, -- Timeout in milliseconds after which the idle status is set, 0 to display immediately
+  --       disable_on_focus = false, -- Do not display idle status when neovim is focused
+  --       text = "Idle", -- Text to display when idle
+  --       tooltip = "💤", -- Text to display when hovering over the idle image
+  --       icon = nil, -- Replace the default idle icon; either an asset ID or a URL
+  --     },
+  --     text = {
+  --       viewing = "Viewing {}", -- Text to display when viewing a readonly file
+  --       editing = "Editing {}", -- Text to display when editing a file
+  --       file_browser = "Browsing files in {}", -- Text to display when browsing files (Empty string to disable)
+  --       plugin_manager = "Managing plugins in {}", -- Text to display when managing plugins (Empty string to disable)
+  --       lsp_manager = "Configuring LSP in {}", -- Text to display when managing LSP servers (Empty string to disable)
+  --       vcs = "Committing changes in {}", -- Text to display when using Git or Git-related plugin (Empty string to disable)
+  --       workspace = "In {}", -- Text to display when in a workspace (Empty string to disable)
+  --     },
+  --     buttons = {
+  --       {
+  --         label = "View Repository", -- Text displayed on the button
+  --         url = "git", -- URL where the button leads to ('git' = automatically fetch Git repository URL)
+  --       },
+  --       -- {
+  --       --   label = 'View Plugin',
+  --       --   url = 'https://github.com/vyfor/cord.nvim',
+  --       -- }
+  --     },
+  --     assets = nil, -- Custom file icons, see the wiki*
+  --     -- assets = {
+  --     --   lazy = {                                 -- Vim filetype or file name or file extension = table or string
+  --     --     name = 'Lazy',                         -- Optional override for the icon name, redundant for language types
+  --     --     icon = 'https://example.com/lazy.png', -- Rich Presence asset name or URL
+  --     --     tooltip = 'lazy.nvim',                 -- Text to display when hovering over the icon
+  --     --     type = 'plugin_manager',               -- One of 'language', 'file_browser', 'plugin_manager', 'lsp_manager', 'vcs' or respective ordinals; defaults to 'language'
+  --     --   },
+  --     --   ['Cargo.toml'] = 'crates',
+  --     -- },
+  --   }, -- calls require('cord').setup()
+  -- },
+  --
 
+  {
+    "vyfor/cord.nvim",
+    build = ":Cord update",
+    opts = function()
+      return {
+        enabled = true,
+        log_level = vim.log.levels.OFF,
+        editor = {
+          client = "neovim",
+          tooltip = "Neovim",
+          icon = nil,
+        },
+        display = {
+          theme = "onyx",
+          swap_fields = false,
+          swap_icons = false,
+        },
+        timestamp = {
+          enabled = true,
+          reset_on_idle = false,
+          reset_on_change = false,
+        },
+        idle = {
+          enabled = true,
+          timeout = 300000,
+          show_status = true,
+          ignore_focus = true,
+          unidle_on_focus = true,
+          smart_idle = true,
+          details = "Idling",
+          state = nil,
+          tooltip = "💤",
+          icon = nil,
+        },
+        text = {
+          workspace = function(opts)
+            return "In " .. opts.workspace
+          end,
+          viewing = function(opts)
+            return "Viewing " .. opts.filename
+          end,
+          editing = function(opts)
+            return "Editing " .. opts.filename
+          end,
+          file_browser = function(opts)
+            return "Browsing files in " .. opts.name
+          end,
+          plugin_manager = function(opts)
+            return "Managing plugins in " .. opts.name
+          end,
+          lsp = function(opts)
+            return "Configuring LSP in " .. opts.name
+          end,
+          docs = function(opts)
+            return "Reading " .. opts.name
+          end,
+          vcs = function(opts)
+            return "Committing changes in " .. opts.name
+          end,
+          notes = function(opts)
+            return "Taking notes in " .. opts.name
+          end,
+          debug = function(opts)
+            return "Debugging in " .. opts.name
+          end,
+          test = function(opts)
+            return "Testing in " .. opts.name
+          end,
+          diagnostics = function(opts)
+            return "Fixing problems in " .. opts.name
+          end,
+          games = function(opts)
+            return "Playing " .. opts.name
+          end,
+          terminal = function(opts)
+            return "Running commands in " .. opts.name
+          end,
+          dashboard = "Home",
+        },
+        buttons = nil,
+        -- buttons = {
+        --   {
+        --     label = 'View Repository',
+        --     url = function(opts) return opts.repo_url end,
+        --   },
+        -- },
+        assets = nil,
+        variables = nil,
+        hooks = {
+          ready = nil,
+          shutdown = nil,
+          pre_activity = nil,
+          post_activity = nil,
+          idle_enter = nil,
+          idle_leave = nil,
+          workspace_change = nil,
+        },
+        plugins = nil,
+        advanced = {
+          plugin = {
+            autocmds = true,
+            cursor_update = "on_hold",
+            match_in_mappings = true,
+          },
+          server = {
+            update = "fetch",
+            pipe_path = nil,
+            executable_path = nil,
+            timeout = 300000,
+          },
+          discord = {
+            reconnect = {
+              enabled = false,
+              interval = 5000,
+              initial = true,
+            },
+          },
+        },
+      }
+    end,
+  },
   -- filename
   {
     "b0o/incline.nvim",
@@ -388,6 +895,7 @@ local colors = {
       })
     end,
   },
+
   {
     "kristijanhusak/vim-dadbod-ui",
     dependencies = {
@@ -411,26 +919,30 @@ local colors = {
         "<cmd>NvimTreeClose<cr><cmd>tabnew<cr><bar><bar><cmd>DBUI<cr>",
       },
     },
-  },
 
-  {
-    "folke/zen-mode.nvim",
-    cmd = "ZenMode",
-    opts = {
-      plugins = {
-        gitsigns = true,
-        tmux = true,
-        kitty = { enabled = false, font = "+2" },
-      },
+    {
+      "SmiteshP/nvim-navic",
+      dependencies = "neovim/nvim-lspconfig",
     },
-    keys = { { "<leader>z", "<cmd>ZenMode<cr>", desc = "Zen Mode" } },
-  },
 
-  {
-    "nvimdev/dashboard-nvim",
-    event = "VimEnter",
-    opts = function(_, opts)
-      local logo = [[
+    {
+      "folke/zen-mode.nvim",
+      cmd = "ZenMode",
+      opts = {
+        plugins = {
+          gitsigns = true,
+          tmux = true,
+          kitty = { enabled = false, font = "+2" },
+        },
+      },
+      keys = { { "<leader>z", "<cmd>ZenMode<cr>", desc = "Zen Mode" } },
+    },
+
+    {
+      "nvimdev/dashboard-nvim",
+      event = "VimEnter",
+      opts = function(_, opts)
+        local logo = [[
 
 
 ████████╗██████╗  ██████╗ ██╗   ██╗
@@ -444,8 +956,9 @@ local colors = {
                                    
       ]]
 
-      logo = string.rep("\n", 8) .. logo .. "\n\n"
-      opts.config.header = vim.split(logo, "\n")
-    end,
+        logo = string.rep("\n", 8) .. logo .. "\n\n"
+        opts.config.header = vim.split(logo, "\n")
+      end,
+    },
   },
 }

@@ -1,18 +1,32 @@
 {
   "extras": [
-    "lazyvim.plugins.extras.coding.codeium",
-    "lazyvim.plugins.extras.coding.tabnine",
+    "lazyvim.plugins.extras.ai.codeium",
+    "lazyvim.plugins.extras.ai.tabnine",
+    "lazyvim.plugins.extras.coding.luasnip",
+    "lazyvim.plugins.extras.coding.mini-surround",
     "lazyvim.plugins.extras.dap.nlua",
+    "lazyvim.plugins.extras.editor.harpoon2",
+    "lazyvim.plugins.extras.editor.inc-rename",
+    "lazyvim.plugins.extras.editor.leap",
+    "lazyvim.plugins.extras.editor.outline",
+    "lazyvim.plugins.extras.editor.telescope",
+    "lazyvim.plugins.extras.lang.clangd",
+    "lazyvim.plugins.extras.lang.cmake",
     "lazyvim.plugins.extras.lang.go",
-    "lazyvim.plugins.extras.lang.java",
+    "lazyvim.plugins.extras.lang.kotlin",
     "lazyvim.plugins.extras.lang.python",
+    "lazyvim.plugins.extras.lang.scala",
+    "lazyvim.plugins.extras.lang.toml",
     "lazyvim.plugins.extras.ui.alpha",
     "lazyvim.plugins.extras.ui.mini-animate",
-    "lazyvim.plugins.extras.editor.outline"
+    "lazyvim.plugins.extras.util.dot",
+    "lazyvim.plugins.extras.util.gitui",
+    "lazyvim.plugins.extras.util.startuptime"
   ],
+  "install_version": 7,
   "news": {
-    "NEWS.md": "4964",
-    "doc/news.txt": "13995"
+    "NEWS.md": "10960",
+    "doc/news.txt": "24450"
   },
-  "version": 4
+  "version": 8
 }

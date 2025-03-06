@@ -25,6 +25,7 @@ return {
         "scss",
         "sql",
         "svelte",
+        "zig",
       },
 
       highlight = {

@@ -25,7 +25,6 @@ return {
             local h, s, l = match:match("hsl%((%d+),? (%d+),? (%d+)%)")
             h, s, l = tonumber(h), tonumber(s), tonumber(l)
             local hex_color = utils.hslToHex(h, s, l)
-            return MiniHipatterns.compute_hex_color_group(hex_color, "bg")
           end,
         },
       },
@@ -146,7 +145,7 @@ return {
         desc = "Open File Browser with the path of the current buffer",
       },
     },
-    config = function(_, opts)
+    opts = function(_, opts)
       local telescope = require("telescope")
       local actions = require("telescope.actions")
       local fb_actions = require("telescope").extensions.file_browser.actions
